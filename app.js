@@ -37,7 +37,9 @@ mongoose.connect("mongodb://localhost:27017/customerDB",{useNewUrlParser: true,u
 
 const customerSchema = new mongoose.Schema({
     email: String,
-    name: {type: String, unique: true},
+    name: {type: String, 
+        // unique: true
+    },
     subject: String,
     message: String
    
@@ -105,20 +107,20 @@ app.post("/",function (req,res) {
    const subscriber = new Subscriber({
        mails: newSubscriber
    });
-   Subscriber.find({},function (foundSubscriber) {
-       if(foundSubscriber){
-           console.log("Your have already subscribe");
-       }else{
-           subscriber.save(function (err) {
-               if(err){
-                   console.log(err);
-               }else{
-                   console.log("New subscriber added to DB");
-                   res.redirect("/");
-               }
-           });
-       }
-   });
+//    Subscriber.find({},function (foundSubscriber) {
+//        if(foundSubscriber){
+//            console.log("Your have already subscribe");
+//        }else{
+//            subscriber.save(function (err) {
+//                if(err){
+//                    console.log(err);
+//                }else{
+//                    console.log("New subscriber added to DB");
+//                    res.redirect("/");
+//                }
+//            });
+//        }
+//    });
 //    customer.save();
 //    res.redirect("/");
 });
@@ -165,12 +167,14 @@ app.get("/compose",function (req,res) {
 
 app.post("/compose",function (req,res) {
    
-    const itemName = req.body.itemName;
-    const price = req.body.price;
-    const brand = req.body.brand;
-    const description = req.body.description;
-    const color = req.body.color;
-    const specification = req.body.specification;
+    // const itemName = req.body.itemName;
+    // const price = req.body.price;
+    // const brand = req.body.brand;
+    // const description = req.body.description;
+    // const color = req.body.color;
+    // const specification = req.body.specification;
+
+    const {itemName,price,brand,description,color,specification} = req.body;
 
     const item =  new Item({
         itemName: itemName,
@@ -181,20 +185,14 @@ app.post("/compose",function (req,res) {
         specification: specification
     });
 
-    item.save(function (err) {
-        if(err){
-            console.log(err);
-        }else{
-            console.log("New Item Store in DB");
+        item.save(function (err) {
+            if(!err){
+                console.log("New Item added to DB");
+                res.redirect("/");
+            }
+        })
 
-        Item.findOne({itemName: itemName},function (err,item) {
-            res.render("shop-item",{item: item});
-            // console.log(item);
-        });
-        // console.log(item);
-        }
-    });
-
+   
     
 
 });
@@ -233,16 +231,14 @@ app.post("/shop-item",function (req,res) {
         
     });
 
-    
-
-
-        // res.render("shop-item",{item: item});
-    });
+});
 
 
 
 app.get("/shop-item",function (req,res) {
-    res.render("shop-item",{item: item});
+    Item.find({},function (err,foundItem) {
+       res.render("shop-item",{item: foundItem});
+    })
 });
 
 
@@ -250,22 +246,30 @@ app.get("/shop-item",function (req,res) {
 // SEARCH ROUTE
 
 app.post("/search",function (req,res) {
-    
+   
     const qSearch = req.body.q;
 
     Item.findOne({itemName: qSearch},function (err,foundItem) {
         if(err){
             console.log(err);
         }else if(!foundItem){
-            console.log("This Item is not store in Database");
-        }
-        else{
-            res.render("shop-single");
-            // console.log(foundItem);
+            console.log("This is not store in Database");
+            res.redirect("/");
+        }else{            
+            // res.render("search",{
+            //     item: foundItem.itemName,
+            //     brand: foundItem.brand,
+            //     price: foundItem.price,
+            //     description: foundItem.description,
+            //     specification: foundItem.specification,
+            //     color: foundItem.color
+            // });
+
+            res.render("shop-item",{item: foundItem});
         }
     });
 
-})
+});
 
 
 //SEARCH ROUTE PARAMETERS
@@ -298,35 +302,6 @@ app.get("/search/:searchName",function (req,res) {
 
       
 });
-
-
-
-// app.get("/search/:q(\d+)",function (req,res) {
-    
-//     const qSearch = req.params.q;
-
-//     Item.findOne({itemName: qSearch},function (err,foundItem) {
-//         if(err){
-//             console.log(err);
-//         }else if(!foundItem){
-//             console.log("This Item is not store in Database");
-//         }
-//         else{
-//             res.render("shop-single");
-//             // console.log(foundItem);
-//         }
-//     });
-
-
-      
-// });
-
-
-
-
-
-
-
 
 
 
